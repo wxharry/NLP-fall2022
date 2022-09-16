@@ -89,8 +89,11 @@ def types_of_dollars():
         "Tuvaluan"
     ]
 
-    
-    return f"(?:(?:{'|'.join(nations)})\s)?dollar(?:s)?"
+    currencies = [
+        "dollar",
+        "cent"
+    ]
+    return f"(?:(?:{'|'.join(nations)})\s)?(?:{'|'.join(currencies)})(?:s)?"
 
 def main():
     context = read_input(sys.argv[1])
