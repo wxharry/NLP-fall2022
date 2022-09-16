@@ -1,9 +1,12 @@
+a dollar
 sixteen dollars
 four dollars
 three thousand dollars
 two hundred thousand dollars
+a dollar
 $1
 $5,000
+a dollar
 Six dollars
 eight or ten dollars
 two dollars

@@ -30,9 +30,10 @@ def write_output(filename, context):
 def identify_dollar(context):
     pattern = regexp_or([
         "\$" + regular_number(),
-        f"(?:(?:{number_words()})\s)+dollars"
+        f"(?:(?:{number_words()})\s)+dollar(?:s)?",
+        f"a dollar(?:s)?"
     ])
-    print(pattern.replace('?:', ''))
+    # print(pattern.replace('?:', ''))
     result = re.findall(pattern, context, re.IGNORECASE)
     return result
 
@@ -54,7 +55,7 @@ def number_words():
 
     scales = ["hundred", "thousand", "million", "billion", "trillion"]
 
-    connects = ["and", "or"]
+    connects = ["and", "or", "-"]
 
     return '|'.join(['|'.join(units), '|'.join(tens), '|'.join(scales), '|'.join(connects)])
 
