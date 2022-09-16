@@ -32,7 +32,7 @@ def identify_dollar(context):
         "\$" + regular_number(),
         f"(?:(?:{number_words()})\s)+dollars"
     ])
-    # print(pattern.replace('?:', ''))
+    print(pattern.replace('?:', ''))
     result = re.findall(pattern, context, re.IGNORECASE)
     return result
 
@@ -54,7 +54,9 @@ def number_words():
 
     scales = ["hundred", "thousand", "million", "billion", "trillion"]
 
-    return '|'.join(['|'.join(units), '|'.join(tens), '|'.join(scales)])
+    connects = ["and", "or"]
+
+    return '|'.join(['|'.join(units), '|'.join(tens), '|'.join(scales), '|'.join(connects)])
 
 def main():
     context = read_input(sys.argv[1])
