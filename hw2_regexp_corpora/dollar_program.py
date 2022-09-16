@@ -29,7 +29,8 @@ def write_output(filename, context):
 
 def identify_dollar(context):
     pattern = regexp_or([
-        "\$" + regular_number(),
+        f"\${regular_number()}",
+        f"{regular_number()} dollar(?:s)?",
         f"(?:(?:{number_words()})\s)+dollar(?:s)?",
         "(?:half )?a dollar"
     ])
@@ -58,6 +59,35 @@ def number_words():
     connects = ["and", "or"]
 
     return '|'.join(['|'.join(units), '|'.join(tens), '|'.join(scales), '|'.join(connects)])
+
+def types_of_dollars():
+    currency = [
+        "Eastern Caribbean",
+        "Australian",
+        "Bahamian",
+        "Barbadian",
+        "Belize",
+        "Bermudian",
+        "Brunei",
+        "Canadian",
+        "Cayman Islands",
+        "United States",
+        "Fijian",
+        "Guyanese",
+        "Hong Kong",
+        "Jamaican",
+        "Kiribati",
+        "Liberian",
+        "Namibian",
+        "New Zealand",
+        "Singapore",
+        "Solomon Islands",
+        "Surinamese",
+        "Spanish",
+        "New Taiwan",
+        "Trinidad and Tobago",
+        "Tuvaluan",
+    ]
 
 def main():
     context = read_input(sys.argv[1])

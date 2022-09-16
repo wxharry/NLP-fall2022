@@ -1,4 +1,6 @@
 half a dollar
+30,000 dollars
+50,000 dollars
 sixteen dollars
 four dollars
 three thousand dollars
