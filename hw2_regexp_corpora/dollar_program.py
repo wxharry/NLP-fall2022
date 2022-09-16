@@ -30,11 +30,11 @@ def write_output(filename, context):
 def identify_dollar(context):
     pattern = regexp_or([
         f"\${regular_number()}",
-        f"{regular_number()} dollar(?:s)?",
-        f"(?:(?:{number_words()})\s)+dollar(?:s)?",
+        f"{regular_number()}\s{types_of_dollars()}",
+        f"(?:(?:{number_words()})\s)+{types_of_dollars()}",
         "(?:half )?a dollar"
     ])
-    # print(pattern.replace('?:', ''))
+    # print(pattern)
     result = re.findall(pattern, context, re.IGNORECASE)
     return result
 
@@ -61,7 +61,7 @@ def number_words():
     return '|'.join(['|'.join(units), '|'.join(tens), '|'.join(scales), '|'.join(connects)])
 
 def types_of_dollars():
-    currency = [
+    nations = [
         "Eastern Caribbean",
         "Australian",
         "Bahamian",
@@ -86,8 +86,11 @@ def types_of_dollars():
         "Spanish",
         "New Taiwan",
         "Trinidad and Tobago",
-        "Tuvaluan",
+        "Tuvaluan"
     ]
+
+    
+    return f"(?:(?:{'|'.join(nations)})\s)?dollar(?:s)?"
 
 def main():
     context = read_input(sys.argv[1])
