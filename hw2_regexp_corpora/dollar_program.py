@@ -58,7 +58,8 @@ def number_words():
 
     connects = ["and", "or"]
 
-    return '|'.join(['|'.join(units), '|'.join(tens), '|'.join(scales), '|'.join(connects)])
+    numbers = regexp_or(units + tens + scales)
+    return f"{numbers}(?: {regexp_or(connects)}? {numbers})*"
 
 def types_of_dollars():
     nations = [
