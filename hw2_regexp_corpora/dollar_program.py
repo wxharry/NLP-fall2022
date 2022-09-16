@@ -55,7 +55,7 @@ def number_words():
 
     scales = ["hundred", "thousand", "million", "billion", "trillion"]
 
-    connects = ["and", "or", "-"]
+    connects = ["and", "or"]
 
     return '|'.join(['|'.join(units), '|'.join(tens), '|'.join(scales), '|'.join(connects)])
 
