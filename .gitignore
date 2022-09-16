@@ -1,2 +1,9 @@
 .DS_store
+
+# hw1
 *.pref
+
+# hw2
+# final text but too big for git
+hw2_regexp_corpora/all-OANC.txt 
+
