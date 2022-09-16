@@ -31,7 +31,7 @@ def identify_dollar(context):
     pattern = regexp_or([
         "\$" + regular_number(),
         f"(?:(?:{number_words()})\s)+dollar(?:s)?",
-        f"a dollar(?:s)?"
+        "(?:half )?a dollar"
     ])
     # print(pattern.replace('?:', ''))
     result = re.findall(pattern, context, re.IGNORECASE)
