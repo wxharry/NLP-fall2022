@@ -28,19 +28,20 @@ def write_output(filename, context):
     print(f"\n{len(context)} lines of dollars are found\n")
 
 def identify_dollar(context):
+    number_pattern = regexp_or([f'{regular_number()} ',f'(?:(?:{number_words()}) )+'])
     pattern = regexp_or([
         f"\${regular_number()}",
-        f"{regular_number()}\s{types_of_dollars()}",
-        f"(?:(?:{number_words()})\s)+{types_of_dollars()}",
-        "(?:half )?a dollar"
+        f"{number_pattern}{types_of_dollars()}(?: and {number_pattern}cent(?:s)?)?",
+        f"{number_pattern}cent(?:s)?",
+        "(?:half )?a dollar(?: and a half|quarter)?"
     ])
-    # print(pattern)
+    print(pattern)
     result = re.findall(pattern, context, re.IGNORECASE)
     return result
 
 def regexp_or(regexps):
     regexps = [f"(?:{x})" for x in regexps]
-    return '|'.join(regexps)
+    return f"(?:{'|'.join(regexps)})"
 
 def regular_number():
     return "\d+(?:,\d+)*(?:.\d+)?"
@@ -88,12 +89,7 @@ def types_of_dollars():
         "Trinidad and Tobago",
         "Tuvaluan"
     ]
-
-    currencies = [
-        "dollar",
-        "cent"
-    ]
-    return f"(?:(?:{'|'.join(nations)})\s)?(?:{'|'.join(currencies)})(?:s)?"
+    return f"(?:{regexp_or(nations)}\s)?dollar(?:s)?"
 
 def main():
     context = read_input(sys.argv[1])
