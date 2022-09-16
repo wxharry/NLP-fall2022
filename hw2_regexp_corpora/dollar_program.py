@@ -30,12 +30,11 @@ def write_output(filename, context):
 def identify_dollar(context):
     number_pattern = regexp_or([f'{regular_number()} ',f'(?:(?:{number_words()}) )+'])
     pattern = regexp_or([
-        f"\${regular_number()}",
+        f"\$(?:{regular_number()})(?:{f'(?: (?:{number_words()}))+'})?",
         f"{number_pattern}{types_of_dollars()}(?: and {number_pattern}cent(?:s)?)?",
         f"{number_pattern}cent(?:s)?",
         "(?:half )?a dollar(?: and a half|quarter)?"
     ])
-    print(pattern)
     result = re.findall(pattern, context, re.IGNORECASE)
     return result
 
