@@ -14,6 +14,7 @@
 import sys
 import re
 
+VERBOSE = False
 
 def read_input(filename):
     context = ""
@@ -25,14 +26,15 @@ def write_output(filename, context):
     context_with_eol = map(lambda r: r + '\n', context)
     with open(filename, "w", encoding='utf-8') as f:
         f.writelines(context_with_eol)
-    print(f"\n{len(context)} lines of dollars are found\n")
+    if VERBOSE:
+        print(f"\n{len(context)} lines of dollars are found\n")
 
 def identify_dollar(context):
     number_pattern = regexp_or([f'{regular_number()} ',f'(?:(?:{number_words()}) )+'])
     pattern = regexp_or([
         f"\$(?:{regular_number()})(?:{f'(?: (?:{number_words()}))+'})?",
-        f"{number_pattern}{types_of_dollars()}(?: and {number_pattern}cent(?:s)?)?",
-        f"{number_pattern}cent(?:s)?",
+        f"(?:(?:half )?a (?:(?:half|quarter) )?)?{number_pattern}{types_of_dollars()}(?: and {number_pattern}cent(?:s)?)?",
+        f"(?:(?:half )?a (?:(?:half|quarter) )?)?{number_pattern}cent(?:s)?",
         "(?:half )?a dollar(?: and a half|quarter)?"
     ])
     result = re.findall(pattern, context, re.IGNORECASE)
@@ -93,6 +95,8 @@ def types_of_dollars():
 
 def main():
     context = read_input(sys.argv[1])
+    global VERBOSE
+    VERBOSE = (len(sys.argv) > 2 and sys.argv[2] == '-v')
     result = identify_dollar(context)
     write_output("dollar_output.txt", result)
 
