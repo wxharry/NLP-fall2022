@@ -58,7 +58,7 @@ def number_words():
 
     scales = ["hundred", "thousand", "million", "billion", "trillion"]
 
-    connects = ["and", "or"]
+    connects = ["and"]
 
     numbers = regexp_or(units + tens + scales)
     return f"{numbers}(?: {regexp_or(connects)}? {numbers})*"
