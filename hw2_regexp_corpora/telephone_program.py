@@ -23,9 +23,9 @@ def write_output(filename, context):
         print(f"\n{len(context)} lines are found\n")
 
 def identify_telephone(context):
+    punctuations = [' ', '-']
     pattern = regexp_or([
-        f"{area_code_pattern()}{regexp_or([' ', '-'])}?{telephone_pattern()}",
-        telephone_pattern()
+        f"{area_code_pattern()}{regexp_or(punctuations)}{telephone_pattern(punctuations)}"
     ])
     if VERBOSE:
         print(pattern)
@@ -36,15 +36,12 @@ def regexp_or(regexps):
     regexps = [f"(?:{x})" for x in regexps]
     return f"(?:{'|'.join(regexps)})"
 
-def telephone_pattern():
-    punctuations = [' ', '-']
-    return "(?<= |\n)\d{3}" + regexp_or(punctuations) + '?' + "\d{4}(?= |\n)"
+def telephone_pattern(punctuations):
+    return "\d{3}" + regexp_or(punctuations)  + r"\d{4}(?= |\n|\.|,)"
 
 def area_code_pattern():
     patterns = ["\(" + "\d{3}" +"\)",
                 "\d{3}",
-                "\(" + "\d{2}" +"\)",
-                "\d{2}"
                 ]
     return regexp_or(patterns)
 
