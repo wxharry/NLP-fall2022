@@ -3,6 +3,7 @@
 # 212-345-1234
 # 777-1000
 
+from string import punctuation
 import sys
 import re
 
@@ -23,8 +24,8 @@ def write_output(filename, context):
 
 def identify_telephone(context):
     pattern = regexp_or([
-        telephone_pattern(10),
-        telephone_pattern(7)
+        f"{area_code_pattern()}{regexp_or([' ', '-'])}?{telephone_pattern()}",
+        telephone_pattern()
     ])
     if VERBOSE:
         print(pattern)
@@ -35,12 +36,17 @@ def regexp_or(regexps):
     regexps = [f"(?:{x})" for x in regexps]
     return f"(?:{'|'.join(regexps)})"
 
-def telephone_pattern(n):
-    repetition = "{"+ str(n-1) + "}"
-    partitions = ["-", "\(", " ", "\)\s?"]
-    starts = ["\("]
-    return f"{regexp_or(starts)}?\d(?:{regexp_or(partitions)}?\d)" + repetition
+def telephone_pattern():
+    punctuations = [' ', '-']
+    return "(?<= |\n)\d{3}" + regexp_or(punctuations) + '?' + "\d{4}(?= |\n)"
 
+def area_code_pattern():
+    patterns = ["\(" + "\d{3}" +"\)",
+                "\d{3}",
+                "\(" + "\d{2}" +"\)",
+                "\d{2}"
+                ]
+    return regexp_or(patterns)
 
 def main():
     context = read_input(sys.argv[1])
