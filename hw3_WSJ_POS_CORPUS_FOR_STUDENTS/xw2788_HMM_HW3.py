@@ -17,6 +17,7 @@ def calc_probability(freq_dict):
 def parse_input(context):
     word_freq = {}
     state_freq = {}
+    word_list = set()
     pre_state = "Begin_Sent"
     for line in context.split('\n'):
         if len(line.split('\t')) < 2:
@@ -26,6 +27,7 @@ def parse_input(context):
             pre_state = 'Begin_Sent'
         else:
             [word, state] = line.split('\t')
+            word_list.add(word)
             word_freq[state] = word_freq.get(state, {})
             word_freq[state][word] = word_freq[state].get(word, 0) + 1
 
@@ -38,12 +40,12 @@ def parse_input(context):
         word_prob[k] = calc_probability(d)
     for k, d in state_freq.items():
         state_prob[k] = calc_probability(d)
-    return word_prob, state_prob
+    return word_prob, state_prob, word_list
 
 
 def main():
     context = read_input('WSJ_24.pos')
-    likelihood, probability = parse_input(context)
+    likelihood, probability, word_list = parse_input(context)
     
 
 if __name__ == "__main__":
