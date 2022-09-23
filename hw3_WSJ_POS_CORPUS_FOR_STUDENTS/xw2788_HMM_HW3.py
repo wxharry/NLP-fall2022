@@ -57,13 +57,12 @@ def parse_input(context):
     return word_prob, state_prob, word_list
 
 def viterbi_HMM_POS_tagger(sentence, likelihood, probability, word_list):
-    m = len(likelihood) + 2
     n = len(sentence) + 2
     table = {k: [0 for _ in range(n)] for k in probability}
     table['End_Sent'] = [0 for _ in range(n)]
     pointer = {k: ["" for _ in range(n)] for k in probability}
     pointer['End_Sent'] = ["" for _ in range(n)]
-    table['Begin_Sent'][0] = 1
+    table['Begin_Sent'][0] = 1000
     pre_states = ["Begin_Sent"]
     for col in range(1, n):
         if col == n - 1:
@@ -81,17 +80,20 @@ def viterbi_HMM_POS_tagger(sentence, likelihood, probability, word_list):
                     if state == 'End_Sent':
                         continue
                     states.add(state)
-                    score = table[pre_state][col-1] * probability[pre_state].get(state, 0) * likelihood[state].get(word, 0.1)
+                    score = table[pre_state][col-1] * probability[pre_state].get(state, 0) * likelihood[state].get(word, 0)
+                    if table[pre_state][col-1] > 0 and probability[pre_state].get(state, 0)>0 and likelihood[state].get(word, 0)>0 and score == 0:
+                        score = min(table[pre_state][col-1],  probability[pre_state].get(state, 0), likelihood[state].get(word, 0))
                     if score > table[state][col]:
                         table[state][col] = score
                         pointer[state][col] = pre_state
             pre_states = list(states)
-    
+
     tagging = []
-    nxt_state = 'End_Sent'
+    cur_state = 'End_Sent'
     for idx in range(n-1, 1, -1):
-        tagging = [pointer[nxt_state][idx]] + tagging
-        nxt_state = pointer[nxt_state][idx]
+        pre_state = pointer[cur_state][idx]
+        tagging = [pre_state] + tagging
+        cur_state = pre_state
     return tagging
 
 
@@ -101,15 +103,17 @@ def write_output(filename, context):
             f.write(line + '\n')
 
 def main():
-    training_txt = 'WSJ_02-21.pos'
-    context = read_input(training_txt)
+    training_txts = ['WSJ_02-21.pos', 'WSJ_24.pos']
+    context = ""
+    for txt in training_txts:
+        context += read_input(txt)
     likelihood, probability, word_list = parse_input(context)
 
     testing_txt = 'WSJ_24.words'
     context = read_with_lines(testing_txt)
     sent_tag = []
     for sentence in context:
-        res = viterbi_HMM_POS_tagger(sentence, likelihood, probability, word_list)    
+        res = viterbi_HMM_POS_tagger(sentence, likelihood, probability, word_list)
         sent_tag.extend([sent + '\t' + tag for sent, tag in zip(sentence, res)])
         sent_tag.append('')
     output_txt = 'submission.pos'
