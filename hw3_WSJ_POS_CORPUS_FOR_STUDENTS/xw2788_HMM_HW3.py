@@ -56,11 +56,11 @@ def parse_input(context):
         state_prob[k] = calc_probability(d)
     return word_prob, state_prob, word_list
 
-def viterbi_HMM_POS_tagger(sentence, likelihood, probability, word_list):
+def viterbi_HMM_POS_tagger(sentence, emissions, transitions, word_list):
     n = len(sentence) + 2
-    table = {k: [0 for _ in range(n)] for k in probability}
+    table = {k: [0 for _ in range(n)] for k in transitions}
     table['End_Sent'] = [0 for _ in range(n)]
-    pointer = {k: ["" for _ in range(n)] for k in probability}
+    pointer = {k: ["" for _ in range(n)] for k in transitions}
     pointer['End_Sent'] = ["" for _ in range(n)]
     table['Begin_Sent'][0] = 1000
     pre_states = ["Begin_Sent"]
@@ -68,7 +68,7 @@ def viterbi_HMM_POS_tagger(sentence, likelihood, probability, word_list):
         if col == n - 1:
             state = 'End_Sent'
             for pre_state in pre_states:
-                score = table[pre_state][col-1] * probability[pre_state].get(state, 0)
+                score = table[pre_state][col-1] * transitions[pre_state].get(state, 0)
                 if score > table[state][col]:
                     table[state][col] = score
                     pointer[state][col] = pre_state
@@ -76,13 +76,13 @@ def viterbi_HMM_POS_tagger(sentence, likelihood, probability, word_list):
             word = sentence[col-1]
             states = set()
             for pre_state in pre_states:
-                for state in probability[pre_state]:
+                for state in transitions[pre_state]:
                     if state == 'End_Sent':
                         continue
                     states.add(state)
-                    score = table[pre_state][col-1] * probability[pre_state].get(state, 0) * likelihood[state].get(word, 0)
-                    if table[pre_state][col-1] > 0 and probability[pre_state].get(state, 0)>0 and likelihood[state].get(word, 0)>0 and score == 0:
-                        score = min(table[pre_state][col-1],  probability[pre_state].get(state, 0), likelihood[state].get(word, 0))
+                    score = table[pre_state][col-1] * transitions[pre_state].get(state, 0) * emissions[state].get(word, 0)
+                    if table[pre_state][col-1] > 0 and transitions[pre_state].get(state, 0)>0 and emissions[state].get(word, 0)>0 and score == 0:
+                        score = min(table[pre_state][col-1],  transitions[pre_state].get(state, 0), emissions[state].get(word, 0))
                     if score > table[state][col]:
                         table[state][col] = score
                         pointer[state][col] = pre_state
@@ -107,13 +107,13 @@ def main():
     context = ""
     for txt in training_txts:
         context += read_input(txt)
-    likelihood, probability, word_list = parse_input(context)
+    emissions, transitions, word_list = parse_input(context)
 
     testing_txt = 'WSJ_24.words'
     context = read_with_lines(testing_txt)
     sent_tag = []
     for sentence in context:
-        res = viterbi_HMM_POS_tagger(sentence, likelihood, probability, word_list)
+        res = viterbi_HMM_POS_tagger(sentence, emissions, transitions, word_list)
         sent_tag.extend([sent + '\t' + tag for sent, tag in zip(sentence, res)])
         sent_tag.append('')
     output_txt = 'submission.pos'
