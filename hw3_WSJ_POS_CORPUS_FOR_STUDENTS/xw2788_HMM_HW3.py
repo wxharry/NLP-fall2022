@@ -64,7 +64,7 @@ def parse_input(context):
             state_state_freq[pre_state][state] = state_state_freq[pre_state].get(state, 0) + 1
             pre_state = state
 
-    word_count, state_word_freq = generate_unknown_word(word_count, state_word_freq)
+    # word_count, state_word_freq = generate_unknown_word(word_count, state_word_freq)
 
     state_word_prob = {}
     state_state_prob = {}
