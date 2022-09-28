@@ -1,4 +1,6 @@
-import nltk
+from string import punctuation
+from nltk import word_tokenize
+from stop_list import closed_class_stop_words
 import re
 
 class Query:
@@ -9,8 +11,17 @@ class Query:
         return f".I: {self.I}\n.W: {self.W}"
     def __repr__(self) -> str:
         return str(self)
+    def pre_process(self):
+        tokens = word_tokenize(self.W)
+        new_W = []
+        for token in tokens:
+            if token in closed_class_stop_words or token.isnumeric() or token in punctuation:
+                continue
+            new_W.append(token)
+        self.W = new_W
 
-class Abstract:
+
+class Abstract(Query):
     def __init__(self, i, t, a, b, w):
         self.I = i
         self.T = t
@@ -19,8 +30,6 @@ class Abstract:
         self.W = w
     def __str__(self) -> str:
         return f".I: {self.I}\n.T: {self.T}\n.A: {self.A}\n.B: {self.B}\n.W: {self.W}"
-    def __repr__(self) -> str:
-        return str(self)
 
 def read_query(filename):
     with open(filename, "r", encoding='utf-8') as f:
@@ -42,9 +51,15 @@ def read_abstract(filename):
         abstracts.append(Abstract(i, t, a, b, w))
     return abstracts
 
+def get_vector(queries):
+    for query in queries:
+        query.pre_process()
+
 def main():
     qry = read_query("cran.qry")
     abstract = read_abstract("cran.all.1400")
+    qry_vector = get_vector(qry)
+    abstract = get_vector(abstract)
     
 
 if __name__ == "__main__":
