@@ -1,3 +1,4 @@
+from math import log2
 from string import punctuation
 from nltk import word_tokenize
 from stop_list import closed_class_stop_words
@@ -7,6 +8,11 @@ class Query:
     def __init__(self, i, w):
         self.I = i
         self.W = w
+        self.pre_process()
+        self.word_list = set(self.W)
+        self.TF = {}
+        self.IDF = {}
+        self.vector = {}
     def __str__(self) -> str:
         return f".I: {self.I}\n.W: {self.W}"
     def __repr__(self) -> str:
@@ -19,6 +25,25 @@ class Query:
                 continue
             new_W.append(token)
         self.W = new_W
+    def calc_TF(self):
+        for term in self.W:
+            self.TF[term] = self.TF.get(term, 0) + 1
+        return self.TF
+    def calc_IDF(self, documents):
+        n = len(documents)
+        for word in self.word_list:
+            count = 0
+            for document in documents:
+                if word in document.word_list:
+                    count += 1
+            self.IDF[word] = log2(n/count)
+        return self.IDF
+    def calc_TF_IDF(self, documents):
+        self.calc_TF()
+        self.calc_IDF(documents)
+        for word in self.word_list:
+            self.vector[word] = self.TF[word] * self.IDF[word]
+        return self.vector
 
 
 class Abstract(Query):
@@ -28,6 +53,11 @@ class Abstract(Query):
         self.A = a
         self.B = b
         self.W = w
+        self.pre_process()
+        self.word_list = set(self.W)
+        self.TF = {}
+        self.IDF = {}
+        self.vector = {}
     def __str__(self) -> str:
         return f".I: {self.I}\n.T: {self.T}\n.A: {self.A}\n.B: {self.B}\n.W: {self.W}"
 
@@ -51,15 +81,12 @@ def read_abstract(filename):
         abstracts.append(Abstract(i, t, a, b, w))
     return abstracts
 
-def get_vector(queries):
-    for query in queries:
-        query.pre_process()
-
 def main():
     qry = read_query("cran.qry")
-    abstract = read_abstract("cran.all.1400")
-    qry_vector = get_vector(qry)
-    abstract = get_vector(abstract)
+    abstracts = read_abstract("cran.all.1400")
+    qry_vectors = [query.calc_TF_IDF(qry) for query in qry]
+    abstract_vectors = [a.calc_TF_IDF(abstracts) for a in abstracts]
+        
     
 
 if __name__ == "__main__":
