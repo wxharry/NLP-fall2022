@@ -1,9 +1,11 @@
 from math import log2, sqrt
 from string import punctuation
-from nltk import word_tokenize
+from nltk import word_tokenize, download
 from stop_list import closed_class_stop_words
 import re
+from operator import itemgetter
 
+download('punkt', quiet=True)
 class Query:
     def __init__(self, i, w):
         self.I = i
@@ -27,12 +29,12 @@ class Query:
         self.W = new_W
     def calc_TF(self):
         for term in self.W:
-            self.TF[term] = self.TF.get(term, 0) + 1
+            self.TF[term] = self.TF.get(term, 1) + 1
         return self.TF
     def calc_IDF(self, documents):
         n = len(documents)
         for word in self.word_list:
-            count = 0
+            count = 1
             for document in documents:
                 if word in document.word_list:
                     count += 1
@@ -46,13 +48,13 @@ class Query:
         return self.vector
     @staticmethod
     def calc_similarity(v_q, v_d):
+        if len(v_q) == 0 or len(v_d) == 0:
+            return 0
         nu = 0
         for a in v_q:
             if a in v_d.keys():
                 nu += v_q[a] + v_d[a]
         de = sqrt(sum([x*x for x in v_q.values()])) * sqrt(sum([x*x for x in v_d.values()]))
-        if de == 0:
-            return 0
         return nu / de
 
 
@@ -96,12 +98,18 @@ def write_output(filename, context):
         for (id1, id2, similarity) in context:
             f.write(f"{id1} {id2} {similarity}\n")
 
+def multisort(xs, specs):
+    for key, reverse in reversed(specs):
+        xs.sort(key=itemgetter(key), reverse=reverse)
+    return xs
+
 def main():
     qry = read_query("cran.qry")
     abstracts = read_abstract("cran.all.1400")
     qry_vectors = [(query.I, query.calc_TF_IDF(qry)) for query in qry]
     abstract_vectors = [(a.I, a.calc_TF_IDF(abstracts)) for a in abstracts]
     similarities = [(vid, aid, Query.calc_similarity(v_q, v_d)) for (vid, v_q) in qry_vectors for (aid, v_d) in abstract_vectors]
+    similarities = multisort(similarities, ((0, False), (2, True)))
     write_output("output.txt", similarities)
 
 if __name__ == "__main__":
