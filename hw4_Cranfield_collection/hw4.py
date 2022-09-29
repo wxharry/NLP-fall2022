@@ -1,4 +1,4 @@
-from math import log2
+from math import log2, sqrt
 from string import punctuation
 from nltk import word_tokenize
 from stop_list import closed_class_stop_words
@@ -44,6 +44,16 @@ class Query:
         for word in self.word_list:
             self.vector[word] = self.TF[word] * self.IDF[word]
         return self.vector
+    @staticmethod
+    def calc_similarity(v_q, v_d):
+        nu = 0
+        for a in v_q:
+            if a in v_d.keys():
+                nu += v_q[a] + v_d[a]
+        de = sqrt(sum([x*x for x in v_q.values()])) * sqrt(sum([x*x for x in v_d.values()]))
+        if de == 0:
+            return 0
+        return nu / de
 
 
 class Abstract(Query):
@@ -81,13 +91,18 @@ def read_abstract(filename):
         abstracts.append(Abstract(i, t, a, b, w))
     return abstracts
 
+def write_output(filename, context):
+    with open(filename, 'w', encoding='utf-8') as f:
+        for (id1, id2, similarity) in context:
+            f.write(f"{id1} {id2} {similarity}\n")
+
 def main():
     qry = read_query("cran.qry")
     abstracts = read_abstract("cran.all.1400")
-    qry_vectors = [query.calc_TF_IDF(qry) for query in qry]
-    abstract_vectors = [a.calc_TF_IDF(abstracts) for a in abstracts]
-        
-    
+    qry_vectors = [(query.I, query.calc_TF_IDF(qry)) for query in qry]
+    abstract_vectors = [(a.I, a.calc_TF_IDF(abstracts)) for a in abstracts]
+    similarities = [(vid, aid, Query.calc_similarity(v_q, v_d)) for (vid, v_q) in qry_vectors for (aid, v_d) in abstract_vectors]
+    write_output("output.txt", similarities)
 
 if __name__ == "__main__":
     main()
