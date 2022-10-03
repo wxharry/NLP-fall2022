@@ -10,8 +10,9 @@ class Query:
     def __init__(self, i, w):
         self.I = i
         self.W = w
+        self.context = w
         self.pre_process()
-        self.word_list = set(self.W)
+        self.word_list = set(self.context)
         self.TF = {}
         self.IDF = {}
         self.vector = {}
@@ -20,15 +21,15 @@ class Query:
     def __repr__(self) -> str:
         return str(self)
     def pre_process(self):
-        tokens = word_tokenize(self.W)
-        new_W = []
+        tokens = word_tokenize(self.context)
+        new_context = []
         for token in tokens:
             if token in closed_class_stop_words or token.isnumeric() or token in punctuation:
                 continue
-            new_W.append(token)
-        self.W = new_W
+            new_context.append(token)
+        self.context = new_context
     def calc_TF(self):
-        for term in self.W:
+        for term in self.context:
             self.TF[term] = self.TF.get(term, 1) + 1
         return self.TF
     def calc_IDF(self, documents):
@@ -65,8 +66,9 @@ class Abstract(Query):
         self.A = a
         self.B = b
         self.W = w
+        self.context = w + t
         self.pre_process()
-        self.word_list = set(self.W)
+        self.word_list = set(self.context)
         self.TF = {}
         self.IDF = {}
         self.vector = {}
