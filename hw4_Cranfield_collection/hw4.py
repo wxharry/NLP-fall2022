@@ -79,8 +79,8 @@ def read_query(filename):
     context = context.replace('\n', ' ').replace('.W', '\n.W').replace('.I', '\n.I')
     re_result = re.findall("\.I (.*)\n\.W (.*)", context)
     queries = []
-    for i, w in re_result:
-        queries.append(Query(i, w))
+    for i, w in zip(range(1, len(re_result)+1), re_result):
+        queries.append(Query(i, w[1]))
     return queries
 
 def read_abstract(filename):
