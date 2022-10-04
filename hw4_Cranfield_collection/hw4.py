@@ -1,4 +1,4 @@
-from math import log2, sqrt
+from math import log10, log2, sqrt
 from string import punctuation
 from nltk import word_tokenize, download
 from stop_list import closed_class_stop_words
@@ -26,7 +26,7 @@ class Query:
         for token in tokens:
             if token in closed_class_stop_words or token.isnumeric() or token in punctuation:
                 continue
-            new_context.append(token)
+            new_context.append(token.lower())
         self.context = new_context
     def calc_TF(self):
         for term in self.context:
@@ -54,7 +54,7 @@ class Query:
         nu = 0
         for a in v_q:
             if a in v_d.keys():
-                nu += v_q[a] + v_d[a]
+                nu += v_q[a] * v_d[a]
         de = sqrt(sum([x*x for x in v_q.values()])) * sqrt(sum([x*x for x in v_d.values()]))
         return nu / de
 
@@ -92,13 +92,12 @@ def read_abstract(filename):
     re_result = re.findall("\.I (.*)\n\.T (.*)\n\.A (.*)\n\.B (.*)\n\.W (.*)", context)
     abstracts = []
     for i, t, a, b, w in re_result:
-        abstracts.append(Abstract(i, t, a, b, w))
+        abstracts.append(Abstract(i.strip(), t, a, b, w))
     return abstracts
 
 def write_output(filename, context):
     with open(filename, 'w', encoding='utf-8') as f:
-        for (id1, id2, similarity) in context:
-            f.write(f"{id1} {id2} {similarity}\n")
+        f.writelines([f"{id1} {id2} {similarity}\n" for (id1, id2, similarity) in context])
 
 def multisort(xs, specs):
     for key, reverse in reversed(specs):
