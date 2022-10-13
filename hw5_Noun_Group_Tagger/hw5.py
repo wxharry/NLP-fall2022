@@ -51,20 +51,24 @@ def parse_context(context):
             word = line[0]
             feature.append(word)
             feature.append(f"POS={line[1]}")
+            feature.append(line[-1])
         features.append('\t'.join(feature))
     return features
 
+def generate_features(input_file, output_file):
+    context = parse_input(input_file)
+    features = parse_context(context)
+    write_output(output_file, features)
 
 def main():
     file_type = sys.argv[1]
-    training_files = ['WSJ_02-21.pos', 'training.feature']
     dev_files = ['WSJ_24.pos', 'test.feature']
     test_files = ['WSJ_23.pos', 'test.feature']
-    input, output = eval(f"{file_type}_files")
+    test_input, test_output = eval(f"{file_type}_files")
+    training_input, training_output = ['WSJ_02-21.pos-chunk', 'training.feature']
 
-    context = parse_input(input)
-    features = parse_context(context)
-    write_output(output, features)
+    generate_features(training_input, training_output)
+    generate_features(test_input, test_output)
 
 if __name__ == "__main__":
     main()

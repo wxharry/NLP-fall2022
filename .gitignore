@@ -1,5 +1,6 @@
 .DS_store
 .vscode/
+*.zip
 
 # hw1
 *.pref
@@ -8,3 +9,8 @@
 # final text but too big for git
 hw2_regexp_corpora/all-OANC.txt 
 
+# hw5
+*.class
+model.chunk
+response.chunk
+*.feature
