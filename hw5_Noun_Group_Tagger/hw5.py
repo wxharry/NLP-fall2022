@@ -4,7 +4,7 @@ NYU ID: xw2788
 email: xiaohanwu12@gmail.com
 """
 
-from string import punctuation
+import re
 import sys
 import nltk
 nltk.download('wordnet')
@@ -25,6 +25,46 @@ def write_output(filename, context):
         for line in context:
             f.write(f"{line}\n")
 
+def parse_cap(word):
+    if word.islower():
+        if len(word) == 4 and word[1] == '.' and word[3] == '.':
+            return "lowercaseWithPeriod"
+        return "lowercase"
+    elif word.isupper():
+        if len(word) == 4 and word[1] == '.' and word[3] == '.':
+            return "uppercaseWithPeriod"
+        elif len(word) == 3:
+            return "ThreeUpperWord"
+        return "uppercase"
+    elif word == word.capitalize():
+        if word[-1] == '.' and not '.' in word[:-1]:
+           return "capsEndsWithPeriod"
+        return "capitalization"
+    else:
+        return None
+
+def parse_num(word):
+    if word.isdigit():
+        if len(word) == 4:
+            return "fourDigitNum"
+        elif len(word) == 2:
+            return "twoDigitNum"
+        return "isdigit"
+    elif re.match(r'\d+\.\d*', word):
+        return "numWithPeriod"
+    elif re.match(r'\d+(,\d+)+', word):
+        return "numWithComma"
+    elif re.match(r'\d+.*', word):
+        if '-' in word:
+            return "numContainsDash"
+        elif '/' in word:
+            return "numContainsSlash"
+        return "numAlpha"
+    else:
+        return None
+
+DATES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
 def parse_context(context, training=False):
     features = []
     offset = 0
@@ -41,11 +81,22 @@ def parse_context(context, training=False):
             word = line[0]
             feature.append(word) # add word
             feature.append(f"POS={line[1]}")
-            feature.append(f"capitalization={word == word.capitalize()}")
-            feature.append(f"lowercase={word.islower()}")
-            feature.append(f"offset={offset+1}")
+            if parse_cap(word):
+                feature.append(f"{parse_cap(word)}")
+            if parse_num(word):
+                feature.append(f"{parse_num(word)}")
+            if word == "``":
+                inside = ""
+                for c in context[i + 1: i + 5]:
+                    inside += c[0]
+                    if "''" in c[0]:
+                        feature.append(f"closeIn4={parse_cap(inside)}")
+                        break
+            if offset == 0:
+                feature.append(f"Begin_Sent")
             offset += 1
             feature.append(f"STEMMED={sno.stem(word)}")
+            # feature.append(f"LEMMA={lemma.lemmatize(word)}")
             if previous_line:
                 word = previous_line[0]
                 feature.append(f"previous_word={word}")
@@ -58,6 +109,8 @@ def parse_context(context, training=False):
                 word = following_line[0]
                 feature.append(f"following_word={word}")
                 feature.append(f"following_POS={following_line[1]}")
+                if word in DATES:
+                    feature.append(f"following_date")
             if previous2_line:
                 word = previous2_line[0]
                 feature.append(f"previous2_word={word}")
